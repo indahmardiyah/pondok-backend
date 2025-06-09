@@ -3,6 +3,7 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config(); // Load variabel dari .env
 
+app.options('*', cors());
 const connectDB = require('./config/db');
 const santriRoutes = require('./routes/santri');
 const pengurusRoutes = require('./routes/pengurus');

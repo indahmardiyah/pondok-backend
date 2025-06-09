@@ -23,6 +23,7 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { username, password } = req.body;
+
     const user = await User.findOne({ username });
     if (!user) return res.status(401).json({ message: 'User tidak ditemukan' });
 
@@ -30,6 +31,11 @@ router.post('/login', async (req, res) => {
     if (!valid) return res.status(401).json({ message: 'Password salah' });
 
     const token = jwt.sign({ id: user._id, role: user.role }, SECRET, { expiresIn: '1d' });
+
+    // Set CORS header untuk response
+    res.setHeader('Access-Control-Allow-Origin', 'https://frontend-pondok.vercel.app');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+
     res.json({ token, role: user.role });
   } catch (err) {
     res.status(500).json({ message: err.message });
