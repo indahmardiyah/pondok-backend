@@ -1,9 +1,14 @@
 const mongoose = require('mongoose');
-require('dotenv').config(); // Memuat variabel dari file .env
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI, {
+    const mongoURI = process.env.MONGODB_URI;
+
+    if (!mongoURI) {
+      throw new Error('❌ MONGODB_URI belum diatur di environment variables');
+    }
+
+    await mongoose.connect(mongoURI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
@@ -11,7 +16,7 @@ const connectDB = async () => {
     console.log('✅ Terhubung ke MongoDB Atlas');
   } catch (err) {
     console.error('❌ Gagal konek ke MongoDB:', err.message);
-    process.exit(1); // Keluar dari proses jika koneksi gagal
+    process.exit(1); // Menghentikan proses jika koneksi gagal
   }
 };
 
