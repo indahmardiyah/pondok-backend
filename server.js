@@ -15,9 +15,17 @@ const PORT = process.env.PORT || 4000;
 // Koneksi ke MongoDB
 connectDB();
 
+// Konfigurasi CORS untuk mengizinkan frontend dari Vercel
+const allowedOrigins = ['https://frontend-pondok.vercel.app'];
 // CORS untuk mengizinkan frontend mengakses API
 app.use(cors({
-  origin: true,
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));
