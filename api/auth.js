@@ -6,33 +6,33 @@ import jwt from 'jsonwebtoken';
 export default async function handler(req, res) {
   await dbConnect();
 
+  // ✅ Atur CORS
   res.setHeader('Access-Control-Allow-Origin', 'https://frontend-pondok.vercel.app');
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') {
-    return res.status(200).end(); // for preflight
+    return res.status(200).end(); // Preflight response
   }
 
-  const { method } = req;
+  // ✅ Handle routes
+  const { method, url } = req;
 
-  switch (method) {
-    case 'POST':
-      if (req.url.includes('register')) {
-        return await handleRegister(req, res);
-      } else if (req.url.includes('login')) {
-        return await handleLogin(req, res);
-      } else {
-        return res.status(404).json({ message: 'Route tidak ditemukan' });
-      }
-
-    default:
-      return res.status(405).json({ message: 'Method tidak diizinkan' });
+  if (method === 'POST') {
+    if (url.endsWith('/register')) {
+      return await handleRegister(req, res);
+    } else if (url.endsWith('/login')) {
+      return await handleLogin(req, res);
+    } else {
+      return res.status(404).json({ message: 'Route tidak ditemukan' });
+    }
   }
+
+  return res.status(405).json({ message: 'Method tidak diizinkan' });
 }
 
-// ✅ Register
+// ✅ Fungsi Register
 async function handleRegister(req, res) {
   try {
     const { username, password, role, nama, email } = req.body;
@@ -42,7 +42,9 @@ async function handleRegister(req, res) {
     }
 
     const existing = await User.findOne({ username });
-    if (existing) return res.status(409).json({ message: 'Username sudah terdaftar' });
+    if (existing) {
+      return res.status(409).json({ message: 'Username sudah terdaftar' });
+    }
 
     const hashed = await bcrypt.hash(password, 10);
     const newUser = new User({ username, password: hashed, role, nama, email });
@@ -54,16 +56,20 @@ async function handleRegister(req, res) {
   }
 }
 
-// ✅ Login
+// ✅ Fungsi Login
 async function handleLogin(req, res) {
   try {
     const { username, password } = req.body;
 
     const user = await User.findOne({ username });
-    if (!user) return res.status(401).json({ message: 'User tidak ditemukan' });
+    if (!user) {
+      return res.status(401).json({ message: 'User tidak ditemukan' });
+    }
 
     const valid = await bcrypt.compare(password, user.password);
-    if (!valid) return res.status(401).json({ message: 'Password salah' });
+    if (!valid) {
+      return res.status(401).json({ message: 'Password salah' });
+    }
 
     const token = jwt.sign(
       { id: user._id, role: user.role },
