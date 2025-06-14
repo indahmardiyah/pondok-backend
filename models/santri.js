@@ -1,13 +1,14 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const santriSchema = new mongoose.Schema({
-  nama: String,
-  umur: Number,
-  asal: String,
-  namaAyah: String,
-  namaIbu: String,
-  jumlahHafalan: Number,
-  foto: String,
+  nama: { type: String, required: true },
+  umur: { type: Number, required: true },
+  asal: { type: String, required: true },
+  namaAyah: { type: String },
+  namaIbu: { type: String },
+  jumlahHafalan: { type: Number },
+  foto: { type: String, default: 'fotodefault.jpg' }
 });
 
-module.exports = mongoose.model('Santri', santriSchema);
+const Santri = mongoose.models.Santri || mongoose.model('Santri', santriSchema);
+export default Santri;

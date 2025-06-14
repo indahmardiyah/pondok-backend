@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
   username: {
@@ -22,4 +22,7 @@ const userSchema = new mongoose.Schema({
   email: String
 });
 
-module.exports = mongoose.model('User', userSchema);
+// Hindari duplikasi model saat fungsi dijalankan ulang di serverless environment
+const User = mongoose.models.User || mongoose.model('User', userSchema);
+
+export default User;

@@ -1,14 +1,15 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const pengurusSchema = new mongoose.Schema({
-  nama: String,
-  jabatan: String,
-  asal: String,
-  namaAyah: String,
-  namaIbu: String,
-  jumlahSaudara: Number,
-  anakKe: Number,
-  foto: String,
+  nama: { type: String, required: true },
+  jabatan: { type: String, required: true },
+  asal: { type: String, required: true },
+  namaAyah: { type: String },
+  namaIbu: { type: String },
+  jumlahSaudara: { type: Number },
+  anakKe: { type: Number },
+  foto: { type: String, default: 'fotodefault.jpg' }
 });
 
-module.exports = mongoose.model('Pengurus', pengurusSchema);
+const Pengurus = mongoose.models.Pengurus || mongoose.model('Pengurus', pengurusSchema);
+export default Pengurus;
