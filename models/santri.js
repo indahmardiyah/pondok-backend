@@ -2,12 +2,11 @@ import mongoose from 'mongoose';
 
 const santriSchema = new mongoose.Schema({
   nama: { type: String, required: true },
-  kelas: { type: String, required: true },
-  umur: { type: Number },
-  asal: { type: String },
-  namaAyah: { type: String },
-  namaIbu: { type: String },
-  jumlahHafalan: { type: Number },
+  umur: { type: Number, required: true },
+  asal: { type: String, required: true },
+  namaAyah: String,
+  namaIbu: String,
+  jumlahHafalan: Number,
   foto: { type: String, default: 'fotodefault.jpg' }
 });
 
