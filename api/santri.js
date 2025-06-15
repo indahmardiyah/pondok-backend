@@ -1,7 +1,20 @@
 import { dbConnect } from '../lib/dbConnect.js';
 import Santri from '../models/santri.js';
 
+import Cors from 'cors';
+import initMiddleware from '../lib/initMiddleware.js';
+
+// Inisialisasi middleware CORS
+const cors = initMiddleware(
+  Cors({
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    origin: 'https://frontend-pondok.vercel.app',
+    credentials: true,
+  })
+);
+
 export default async function handler(req, res) {
+  await cors(req, res);       // ⬅️ Tambahkan ini di paling atas
   await dbConnect();
   const { method, query, body } = req;
 

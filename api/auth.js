@@ -2,8 +2,21 @@ import {dbConnect} from '../lib/dbConnect.js';
 import User from '../models/user.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import Cors from 'cors';
+import initMiddleware from '../lib/initMiddleware.js';
+
+const cors = initMiddleware(
+  Cors({
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    origin: 'https://frontend-pondok.vercel.app',
+    credentials: true,
+  })
+);
+
+// lalu panggil: await cors(req, res);
 
 export default async function handler(req, res) {
+  await cors(req, res);
   await dbConnect();
 
   // ✅ Konfigurasi CORS
