@@ -1,16 +1,30 @@
+import express from 'express';
+import cors from 'cors';
 import dbConnect from '../lib/dbConnect.js';
 import auth from './auth.js';
 import pengurus from './pengurus.js';
 import santri from './santri.js';
 import user from './user.js';
 
-export default async function handler(req, res) {
-  await dbConnect();
+const app = express();
 
-  if (req.url.startsWith('/api/auth')) return auth(req, res);
-  if (req.url.startsWith('/api/pengurus')) return pengurus(req, res);
-  if (req.url.startsWith('/api/santri')) return santri(req, res);
-  if (req.url.startsWith('/api/user')) return user(req, res);
+app.use(cors({
+  origin: 'https://frontend-pondok.vercel.app',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+app.use(express.json());
 
-  res.status(404).json({ message: 'Route not found' });
-}
+dbConnect().catch(err => console.error('Database connection error:', err));
+
+app.use('/api/auth', auth);
+app.use('/api/pengurus', pengurus);
+app.use('/api/santri', santri);
+app.use('/api/user', user);
+
+app.use((req, res) => {
+  res.status(404).json({ message: 'Route tidak ditemukan' });
+});
+
+export default app;

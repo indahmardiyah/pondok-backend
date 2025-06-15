@@ -1,60 +1,73 @@
-import dbConnect from '../lib/dbConnect.js';
+import express from 'express';
 import Santri from '../models/santri.js';
 
-export default async function handler(req, res) {
-  await dbConnect();
-  const { method } = req;
+const router = express.Router();
 
-  switch (method) {
-    case 'GET':
-      try {
-        if (req.query.id) {
-          const data = await Santri.findById(req.query.id);
-          if (!data) return res.status(404).json({ message: 'Santri tidak ditemukan' });
-          return res.status(200).json(data);
-        } else {
-          const all = await Santri.find();
-          return res.status(200).json(all);
-        }
-      } catch (err) {
-        return res.status(500).json({ message: err.message });
+router.get('/', async (req, res) => {
+  try {
+    if (req.query.id) {
+      const santri = await Santri.findById(req.query.id);
+      if (!santri) {
+        return res.status(404).json({ message: 'Santri tidak ditemukan' });
       }
-
-    case 'POST':
-      try {
-        const newSantri = new Santri({
-          ...req.body,
-          foto: 'fotodefault.jpg'
-        });
-        await newSantri.save();
-        return res.status(201).json({ message: 'Santri berhasil ditambahkan' });
-      } catch (err) {
-        return res.status(400).json({ message: err.message });
-      }
-
-    case 'PUT':
-      try {
-        const updated = await Santri.findByIdAndUpdate(
-          req.query.id,
-          { ...req.body },
-          { new: true, runValidators: true }
-        );
-        if (!updated) return res.status(404).json({ message: 'Santri tidak ditemukan' });
-        return res.status(200).json({ message: 'Santri berhasil diperbarui', data: updated });
-      } catch (err) {
-        return res.status(500).json({ message: err.message });
-      }
-
-    case 'DELETE':
-      try {
-        const deleted = await Santri.findByIdAndDelete(req.query.id);
-        if (!deleted) return res.status(404).json({ message: 'Santri tidak ditemukan' });
-        return res.status(200).json({ message: 'Santri berhasil dihapus' });
-      } catch (err) {
-        return res.status(500).json({ message: err.message });
-      }
-
-    default:
-      return res.status(405).json({ message: 'Method tidak diizinkan' });
+      return res.status(200).json(santri);
+    }
+    const allSantri = await Santri.find();
+    return res.status(200).json(allSantri);
+  } catch (err) {
+    return res.status(500).json({ message: 'Kesalahan server: ' + err.message });
   }
-}
+});
+
+router.post('/', async (req, res) => {
+  try {
+    if (!req.body.nama || !req.body.kelas) {
+      return res.status(400).json({ message: 'Nama dan kelas wajib diisi' });
+    }
+    const newSantri = new Santri({
+      ...req.body,
+      foto: req.body.foto || 'fotodefault.jpg'
+    });
+    await newSantri.save();
+    return res.status(201).json({ message: 'Santri berhasil ditambahkan', data: newSantri });
+  } catch (err) {
+    return res.status(400).json({ message: 'Gagal menambahkan santri: ' + err.message });
+  }
+});
+
+router.put('/:id', async (req, res) => {
+  try {
+    if (!req.body.nama || !req.body.kelas) {
+      return res.status(400).json({ message: 'Nama dan kelas wajib diisi' });
+    }
+    const updatedSantri = await Santri.findByIdAndUpdate(
+      req.params.id,
+      { ...req.body, foto: req.body.foto || 'fotodefault.jpg' },
+      { new: true, runValidators: true }
+    );
+    if (!updatedSantri) {
+      return res.status(404).json({ message: 'Santri tidak ditemukan' });
+    }
+    return res.status(200).json({ message: 'Santri berhasil diperbarui', data: updatedSantri });
+  } catch (err) {
+    return res.status(400).json({ message: 'Gagal memperbarui santri: ' + err.message });
+  }
+});
+
+router.delete('/:id', async (req, res) => {
+  try {
+    const deletedSantri = await Santri.findByIdAndDelete(req.params.id);
+    if (!deletedSantri) {
+      return res.status(404).json({ message: 'Santri tidak ditemukan' });
+    }
+    return res.status(200).json({ message: 'Santri berhasil dihapus' });
+  } catch (err) {
+    return res.status(500).json({ message: 'Kesalahan server: ' + err.message });
+  }
+});
+
+router.all('*', (req, res) => {
+  return res.status(405).json({ message: 'Metode HTTP tidak diizinkan' });
+});
+
+export default router;

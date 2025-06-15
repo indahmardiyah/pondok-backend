@@ -2,7 +2,9 @@
   "name": "pondok-backend",
   "version": "1.0.0",
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "dev": "vercel dev"
+  },
   "keywords": ["vercel", "serverless", "pondok", "backend"],
   "author": "Tim Pondok",
   "license": "MIT",
@@ -10,6 +12,8 @@
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.14.3"
+    "mongoose": "^8.14.3",
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
   }
 }
