@@ -2,13 +2,17 @@
   "name": "pondok-backend",
   "version": "1.0.0",
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js"
+  },
   "keywords": ["vercel", "serverless", "pondok", "backend"],
   "author": "Tim Pondok",
   "license": "MIT",
   "description": "Backend serverless untuk manajemen pondok pesantren",
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.14.3"
   }
