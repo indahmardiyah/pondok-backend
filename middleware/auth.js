@@ -1,9 +1,7 @@
-// middleware/auth.js
-import jwt from 'jsonwebtoken';
-
+const jwt = require('jsonwebtoken');
 const SECRET = process.env.JWT_SECRET;
 
-export function authMiddleware(req, res, next) {
+function authMiddleware(req, res, next) {
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) return res.status(401).json({ message: 'Token tidak ditemukan' });
 
@@ -16,11 +14,11 @@ export function authMiddleware(req, res, next) {
   }
 }
 
-export function checkRole(role) {
+function checkRole(role) {
   return (req, res, next) => {
-    if (req.user?.role !== role) {
-      return res.status(403).json({ message: 'Akses ditolak' });
-    }
+    if (req.user?.role !== role) return res.status(403).json({ message: 'Akses ditolak' });
     next();
   };
 }
+
+module.exports = { authMiddleware, checkRole };

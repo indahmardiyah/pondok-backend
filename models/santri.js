@@ -4,9 +4,9 @@ const santriSchema = new mongoose.Schema({
   nama: { type: String, required: true },
   umur: { type: Number, required: true },
   asal: { type: String, required: true },
-  namaAyah: String,
-  namaIbu: String,
-  jumlahHafalan: Number,
+  namaAyah: { type: String },
+  namaIbu: { type: String },
+  jumlahHafalan: { type: Number },
   foto: { type: String, default: 'fotodefault.jpg' }
 });
 

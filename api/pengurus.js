@@ -1,41 +1,61 @@
-import express from 'express';
+import dbConnect from '../lib/dbConnect.js';
 import Pengurus from '../models/pengurus.js';
-import { authMiddleware, checkRole } from '../middleware/auth.js';
 
-const router = express.Router();
+export default async function handler(req, res) {
+  await dbConnect();
 
-// Hanya admin yang bisa mengakses rute ini
-router.get('/', authMiddleware, checkRole('admin'), async (req, res) => {
-  try {
-    if (req.query.id) {
-      const pengurus = await Pengurus.findById(req.query.id);
-      if (!pengurus) {
-        return res.status(404).json({ message: 'Pengurus tidak ditemukan' });
+  const { method } = req;
+
+  switch (method) {
+    case 'GET':
+      try {
+        if (req.query.id) {
+          const pengurus = await Pengurus.findById(req.query.id);
+          if (!pengurus) return res.status(404).json({ message: 'Data tidak ditemukan' });
+          return res.status(200).json(pengurus);
+        } else {
+          const all = await Pengurus.find();
+          return res.status(200).json(all);
+        }
+      } catch (err) {
+        return res.status(500).json({ message: err.message });
       }
-      return res.status(200).json(pengurus);
-    }
-    const allPengurus = await Pengurus.find();
-    return res.status(200).json(allPengurus);
-  } catch (err) {
-    return res.status(500).json({ message: 'Kesalahan server: ' + err.message });
+
+    case 'POST':
+      try {
+        const newData = new Pengurus({
+          ...req.body,
+          foto: 'fotodefault.jpg'
+        });
+        await newData.save();
+        return res.status(201).json({ message: 'Pengurus berhasil ditambahkan' });
+      } catch (err) {
+        return res.status(400).json({ message: err.message });
+      }
+
+    case 'PUT':
+      try {
+        const updated = await Pengurus.findByIdAndUpdate(
+          req.query.id,
+          { ...req.body },
+          { new: true, runValidators: true }
+        );
+        if (!updated) return res.status(404).json({ message: 'Data tidak ditemukan' });
+        return res.status(200).json({ message: 'Berhasil diperbarui', data: updated });
+      } catch (err) {
+        return res.status(400).json({ message: err.message });
+      }
+
+    case 'DELETE':
+      try {
+        const deleted = await Pengurus.findByIdAndDelete(req.query.id);
+        if (!deleted) return res.status(404).json({ message: 'Data tidak ditemukan' });
+        return res.status(200).json({ message: 'Data berhasil dihapus' });
+      } catch (err) {
+        return res.status(500).json({ message: err.message });
+      }
+
+    default:
+      return res.status(405).json({ message: 'Method tidak diizinkan' });
   }
-});
-
-// Tambahkan middleware serupa untuk rute POST, PUT, DELETE
-router.post('/', authMiddleware, checkRole('admin'), async (req, res) => {
-  // ... kode existing ...
-});
-
-router.put('/:id', authMiddleware, checkRole('admin'), async (req, res) => {
-  // ... kode existing ...
-});
-
-router.delete('/:id', authMiddleware, checkRole('admin'), async (req, res) => {
-  // ... kode existing ...
-});
-
-router.all('*', (req, res) => {
-  return res.status(405).json({ message: 'Metode HTTP tidak diizinkan' });
-});
-
-export default router;
+}
