@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import dbConnect from '../lib/dbConnect.js';
+import { dbConnect } from '../lib/dbConnect.js'; // Changed to named import
 import auth from './auth.js';
 import pengurus from './pengurus.js';
 import santri from './santri.js';
@@ -25,6 +25,9 @@ app.use('/api/user', user);
 
 app.use((req, res) => {
   res.status(404).json({ message: 'Route tidak ditemukan' });
+});
+app.get('/', (req, res) => {
+  res.status(200).json({ message: 'API is running' });
 });
 
 export default app;

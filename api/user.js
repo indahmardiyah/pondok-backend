@@ -4,24 +4,13 @@ import User from '../models/user.js';
 
 const router = express.Router();
 
+// Connect to MongoDB before processing requests
 router.use(async (req, res, next) => {
   await dbConnect();
   next();
 });
 
-// Konfigurasi CORS
-router.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', 'https://frontend-pondok.vercel.app');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  next();
-});
-
-router.options('/', (req, res) => {
-  res.status(200).end();
-});
-
+// GET /api/user
 router.get('/', async (req, res) => {
   try {
     const users = await User.find({}, '-password');
@@ -31,6 +20,7 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Handle unsupported methods
 router.use((req, res) => {
   res.status(405).json({ message: 'Metode HTTP tidak diizinkan' });
 });
