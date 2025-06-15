@@ -1,61 +1,41 @@
-import {dbConnect} from '../lib/dbConnect.js';
+import { dbConnect } from '../lib/dbConnect.js';
 import Pengurus from '../models/pengurus.js';
 
 export default async function handler(req, res) {
   await dbConnect();
+  const { method, query, body } = req;
 
-  const { method } = req;
-
-  switch (method) {
-    case 'GET':
-      try {
-        if (req.query.id) {
-          const pengurus = await Pengurus.findById(req.query.id);
-          if (!pengurus) return res.status(404).json({ message: 'Data tidak ditemukan' });
+  try {
+    switch (method) {
+      case 'GET':
+        if (query.id) {
+          const pengurus = await Pengurus.findById(query.id);
+          if (!pengurus) return res.status(404).json({ message: 'Pengurus not found' });
           return res.status(200).json(pengurus);
-        } else {
-          const all = await Pengurus.find();
-          return res.status(200).json(all);
         }
-      } catch (err) {
-        return res.status(500).json({ message: err.message });
-      }
+        const all = await Pengurus.find();
+        return res.status(200).json(all);
 
-    case 'POST':
-      try {
-        const newData = new Pengurus({
-          ...req.body,
-          foto: 'fotodefault.jpg'
-        });
-        await newData.save();
-        return res.status(201).json({ message: 'Pengurus berhasil ditambahkan' });
-      } catch (err) {
-        return res.status(400).json({ message: err.message });
-      }
+      case 'POST':
+        const created = await Pengurus.create(body);
+        return res.status(201).json(created);
 
-    case 'PUT':
-      try {
-        const updated = await Pengurus.findByIdAndUpdate(
-          req.query.id,
-          { ...req.body },
-          { new: true, runValidators: true }
-        );
-        if (!updated) return res.status(404).json({ message: 'Data tidak ditemukan' });
-        return res.status(200).json({ message: 'Berhasil diperbarui', data: updated });
-      } catch (err) {
-        return res.status(400).json({ message: err.message });
-      }
+      case 'PUT':
+        if (!query.id) return res.status(400).json({ message: 'Missing id in query' });
+        const updated = await Pengurus.findByIdAndUpdate(query.id, body, { new: true });
+        return res.status(200).json(updated);
 
-    case 'DELETE':
-      try {
-        const deleted = await Pengurus.findByIdAndDelete(req.query.id);
-        if (!deleted) return res.status(404).json({ message: 'Data tidak ditemukan' });
-        return res.status(200).json({ message: 'Data berhasil dihapus' });
-      } catch (err) {
-        return res.status(500).json({ message: err.message });
-      }
+      case 'DELETE':
+        if (!query.id) return res.status(400).json({ message: 'Missing id in query' });
+        await Pengurus.findByIdAndDelete(query.id);
+        return res.status(204).end();
 
-    default:
-      return res.status(405).json({ message: 'Method tidak diizinkan' });
+      default:
+        res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
+        return res.status(405).json({ message: `Method ${method} Not Allowed` });
+    }
+  } catch (error) {
+    console.error('API Error:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 }

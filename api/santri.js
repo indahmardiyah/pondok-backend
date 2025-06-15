@@ -1,60 +1,41 @@
-import {dbConnect} from '../lib/dbConnect.js';
+import { dbConnect } from '../lib/dbConnect.js';
 import Santri from '../models/santri.js';
 
 export default async function handler(req, res) {
   await dbConnect();
-  const { method } = req;
+  const { method, query, body } = req;
 
-  switch (method) {
-    case 'GET':
-      try {
-        if (req.query.id) {
-          const data = await Santri.findById(req.query.id);
-          if (!data) return res.status(404).json({ message: 'Santri tidak ditemukan' });
-          return res.status(200).json(data);
-        } else {
-          const all = await Santri.find();
-          return res.status(200).json(all);
+  try {
+    switch (method) {
+      case 'GET':
+        if (query.id) {
+          const santri = await Santri.findById(query.id);
+          if (!santri) return res.status(404).json({ message: 'Santri not found' });
+          return res.status(200).json(santri);
         }
-      } catch (err) {
-        return res.status(500).json({ message: err.message });
-      }
+        const all = await Santri.find();
+        return res.status(200).json(all);
 
-    case 'POST':
-      try {
-        const newSantri = new Santri({
-          ...req.body,
-          foto: 'fotodefault.jpg'
-        });
-        await newSantri.save();
-        return res.status(201).json({ message: 'Santri berhasil ditambahkan' });
-      } catch (err) {
-        return res.status(400).json({ message: err.message });
-      }
+      case 'POST':
+        const created = await Santri.create(body);
+        return res.status(201).json(created);
 
-    case 'PUT':
-      try {
-        const updated = await Santri.findByIdAndUpdate(
-          req.query.id,
-          { ...req.body },
-          { new: true, runValidators: true }
-        );
-        if (!updated) return res.status(404).json({ message: 'Santri tidak ditemukan' });
-        return res.status(200).json({ message: 'Santri berhasil diperbarui', data: updated });
-      } catch (err) {
-        return res.status(500).json({ message: err.message });
-      }
+      case 'PUT':
+        if (!query.id) return res.status(400).json({ message: 'Missing id in query' });
+        const updated = await Santri.findByIdAndUpdate(query.id, body, { new: true });
+        return res.status(200).json(updated);
 
-    case 'DELETE':
-      try {
-        const deleted = await Santri.findByIdAndDelete(req.query.id);
-        if (!deleted) return res.status(404).json({ message: 'Santri tidak ditemukan' });
-        return res.status(200).json({ message: 'Santri berhasil dihapus' });
-      } catch (err) {
-        return res.status(500).json({ message: err.message });
-      }
+      case 'DELETE':
+        if (!query.id) return res.status(400).json({ message: 'Missing id in query' });
+        await Santri.findByIdAndDelete(query.id);
+        return res.status(204).end();
 
-    default:
-      return res.status(405).json({ message: 'Method tidak diizinkan' });
+      default:
+        res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
+        return res.status(405).json({ message: `Method ${method} Not Allowed` });
+    }
+  } catch (error) {
+    console.error('API Error:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 }
