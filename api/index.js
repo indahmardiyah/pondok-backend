@@ -1,4 +1,4 @@
-import dbConnect from '../lib/dbConnect.js';
+import {dbConnect} from '../lib/dbConnect.js';
 import auth from './auth.js';
 import pengurus from './pengurus.js';
 import santri from './santri.js';
