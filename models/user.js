@@ -4,29 +4,22 @@ const userSchema = new mongoose.Schema({
   username: {
     type: String,
     required: true,
-    unique: true,
-    minlength: 3,
-    maxlength: 20
+    unique: true
   },
   password: {
     type: String,
-    required: true,
-    minlength: 6
+    required: true
   },
   role: {
     type: String,
-    enum: ['admin', 'pengurus', 'orangtua'],
+    enum: ['admin', 'pengurus', 'santri'], // Fixed: changed 'orangtua' to 'santri'
     required: true
   },
   nama: {
     type: String,
-    required: true,
-    minlength: 2
+    required: true
   },
-  email: {
-    type: String,
-    match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  }
+  email: String
 });
 
 const User = mongoose.models.User || mongoose.model('User', userSchema);
