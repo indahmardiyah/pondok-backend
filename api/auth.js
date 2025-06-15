@@ -6,26 +6,26 @@ import jwt from 'jsonwebtoken';
 export default async function handler(req, res) {
   await dbConnect();
 
-  // ✅ Atur CORS
+  // ✅ Konfigurasi CORS
   res.setHeader('Access-Control-Allow-Origin', 'https://frontend-pondok.vercel.app');
   res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') {
-    return res.status(200).end(); // Preflight response
+    return res.status(200).end(); // Untuk preflight
   }
 
-  // ✅ Handle routes
-  const { method, url } = req;
+  // ✅ Ambil query parameter
+  const { method, query } = req;
 
   if (method === 'POST') {
-    if (url.endsWith('/register')) {
+    if (query.register !== undefined) {
       return await handleRegister(req, res);
-    } else if (url.endsWith('/login')) {
+    } else if (query.login !== undefined) {
       return await handleLogin(req, res);
     } else {
-      return res.status(404).json({ message: 'Route tidak ditemukan' });
+      return res.status(404).json({ message: 'Query route tidak dikenali' });
     }
   }
 
