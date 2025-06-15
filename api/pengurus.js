@@ -1,10 +1,13 @@
 import express from 'express';
 import Pengurus from '../models/pengurus.js';
+import { authMiddleware, checkRole } from '../middleware/auth.js';
+import { dbConnect } from '../lib/dbConnect.js';
 
 const router = express.Router();
 
-router.get('/', async (req, res) => {
+router.get('/', authMiddleware, checkRole('admin'), async (req, res) => {
   try {
+    await dbConnect();
     if (req.query.id) {
       const pengurus = await Pengurus.findById(req.query.id);
       if (!pengurus) {
@@ -15,14 +18,17 @@ router.get('/', async (req, res) => {
     const allPengurus = await Pengurus.find();
     return res.status(200).json(allPengurus);
   } catch (err) {
+    console.error('Get pengurus error:', err);
     return res.status(500).json({ message: 'Kesalahan server: ' + err.message });
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', authMiddleware, checkRole('admin'), async (req, res) => {
   try {
-    if (!req.body.nama || !req.body.jabatan) {
-      return res.status(400).json({ message: 'Nama dan jabatan wajib diisi' });
+    await dbConnect();
+    const { nama, jabatan, asal } = req.body;
+    if (!nama || !jabatan || !asal) {
+      return res.status(400).json({ message: 'Nama, jabatan, dan asal wajib diisi' });
     }
     const newPengurus = new Pengurus({
       ...req.body,
@@ -31,14 +37,17 @@ router.post('/', async (req, res) => {
     await newPengurus.save();
     return res.status(201).json({ message: 'Pengurus berhasil ditambahkan', data: newPengurus });
   } catch (err) {
+    console.error('Add pengurus error:', err);
     return res.status(400).json({ message: 'Gagal menambahkan pengurus: ' + err.message });
   }
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', authMiddleware, checkRole('admin'), async (req, res) => {
   try {
-    if (!req.body.nama || !req.body.jabatan) {
-      return res.status(400).json({ message: 'Nama dan jabatan wajib diisi' });
+    await dbConnect();
+    const { nama, jabatan, asal } = req.body;
+    if (!nama || !jabatan || !asal) {
+      return res.status(400).json({ message: 'Nama, jabatan, dan asal wajib diisi' });
     }
     const updatedPengurus = await Pengurus.findByIdAndUpdate(
       req.params.id,
@@ -50,18 +59,21 @@ router.put('/:id', async (req, res) => {
     }
     return res.status(200).json({ message: 'Pengurus berhasil diperbarui', data: updatedPengurus });
   } catch (err) {
+    console.error('Update pengurus error:', err);
     return res.status(400).json({ message: 'Gagal memperbarui pengurus: ' + err.message });
   }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authMiddleware, checkRole('admin'), async (req, res) => {
   try {
+    await dbConnect();
     const deletedPengurus = await Pengurus.findByIdAndDelete(req.params.id);
     if (!deletedPengurus) {
       return res.status(404).json({ message: 'Pengurus tidak ditemukan' });
     }
     return res.status(200).json({ message: 'Pengurus berhasil dihapus' });
   } catch (err) {
+    console.error('Delete pengurus error:', err);
     return res.status(500).json({ message: 'Kesalahan server: ' + err.message });
   }
 });

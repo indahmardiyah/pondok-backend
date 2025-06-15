@@ -1,28 +1,23 @@
 import express from 'express';
-import { dbConnect } from '../lib/dbConnect.js';
 import User from '../models/user.js';
+import { authMiddleware, checkRole } from '../middleware/auth.js';
+import { dbConnect } from '../lib/dbConnect.js';
 
 const router = express.Router();
 
-// Connect to MongoDB before processing requests
-router.use(async (req, res, next) => {
-  await dbConnect();
-  next();
-});
-
-// GET /api/user
-router.get('/', async (req, res) => {
+router.get('/', authMiddleware, checkRole('admin'), async (req, res) => {
   try {
+    await dbConnect();
     const users = await User.find({}, '-password');
     return res.status(200).json(users);
   } catch (err) {
+    console.error('Get users error:', err);
     return res.status(500).json({ message: 'Kesalahan server: ' + err.message });
   }
 });
 
-// Handle unsupported methods
-router.use((req, res) => {
-  res.status(405).json({ message: 'Metode HTTP tidak diizinkan' });
+router.all('*', (req, res) => {
+  return res.status(405).json({ message: 'Metode HTTP tidak diizinkan' });
 });
 
 export default router;

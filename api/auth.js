@@ -2,11 +2,13 @@ import express from 'express';
 import User from '../models/user.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { dbConnect } from '../lib/dbConnect.js';
 
 const router = express.Router();
 
 router.post('/register', async (req, res) => {
   try {
+    await dbConnect();
     const { username, password, role, nama, email } = req.body;
 
     if (!username || !password || !role || !nama) {
@@ -18,7 +20,7 @@ router.post('/register', async (req, res) => {
     if (password.length < 6) {
       return res.status(400).json({ message: 'Password minimal 6 karakter' });
     }
-    if (!['admin', 'pengurus', 'santri'].includes(role)) {
+    if (!['admin', 'pengurus', 'orangtua'].includes(role)) {
       return res.status(400).json({ message: 'Role tidak valid' });
     }
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -36,12 +38,14 @@ router.post('/register', async (req, res) => {
 
     return res.status(201).json({ message: 'Registrasi berhasil' });
   } catch (err) {
+    console.error('Registration error:', err);
     return res.status(500).json({ message: 'Kesalahan server: ' + err.message });
   }
 });
 
 router.post('/login', async (req, res) => {
   try {
+    await dbConnect();
     const { username, password } = req.body;
 
     if (!username || !password) {
@@ -70,6 +74,7 @@ router.post('/login', async (req, res) => {
 
     return res.status(200).json({ token, role: user.role, username: user.username });
   } catch (err) {
+    console.error('Login error:', err);
     return res.status(500).json({ message: 'Kesalahan server: ' + err.message });
   }
 });

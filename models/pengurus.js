@@ -1,13 +1,13 @@
 import mongoose from 'mongoose';
 
 const pengurusSchema = new mongoose.Schema({
-  nama: { type: String, required: true },
-  jabatan: { type: String, required: true },
-  asal: { type: String, required: true },
+  nama: { type: String, required: true, minlength: 2 },
+  jabatan: { type: String, required: true, minlength: 2 },
+  asal: { type: String, required: true, minlength: 2 },
   namaAyah: { type: String },
   namaIbu: { type: String },
-  jumlahSaudara: { type: Number },
-  anakKe: { type: Number },
+  jumlahSaudara: { type: Number, min: 0 },
+  anakKe: { type: Number, min: 1 },
   foto: { type: String, default: 'fotodefault.jpg' }
 });
 

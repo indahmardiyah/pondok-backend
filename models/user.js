@@ -4,11 +4,14 @@ const userSchema = new mongoose.Schema({
   username: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
+    minlength: 3,
+    maxlength: 20
   },
   password: {
     type: String,
-    required: true
+    required: true,
+    minlength: 6
   },
   role: {
     type: String,
@@ -17,12 +20,14 @@ const userSchema = new mongoose.Schema({
   },
   nama: {
     type: String,
-    required: true
+    required: true,
+    minlength: 2
   },
-  email: String
+  email: {
+    type: String,
+    match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  }
 });
 
-// Hindari duplikasi model saat fungsi dijalankan ulang di serverless environment
 const User = mongoose.models.User || mongoose.model('User', userSchema);
-
 export default User;
