@@ -6,7 +6,7 @@ import initMiddleware from '../lib/initMiddleware.js';
 const cors = initMiddleware(
   Cors({
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    origin: '*',
+    origin: 'https://frontend-pondok.vercel.app',
     credentials: true,
   })
 );
